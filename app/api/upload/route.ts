@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { cookies } from 'next/headers';
 
 const s3 = new S3Client({
@@ -22,7 +22,20 @@ export async function POST(request: Request) {
   const directory = formData.get('directory') as string;
   
   const buffer = Buffer.from(await file.arrayBuffer());
-  const key = `${tenant}/${directory}/${Date.now()}-${file.name}`;
+  const key = `${tenant}/${directory}/${file.name}`;
+
+  // Check if file already exists
+  try {
+    await s3.send(new HeadObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET!,
+      Key: key,
+    }));
+    return NextResponse.json({ error: 'File already exists at this location' }, { status: 409 });
+  } catch (err: any) {
+    if (err.name !== 'NotFound') {
+      throw err;
+    }
+  }
 
   await s3.send(new PutObjectCommand({
     Bucket: process.env.AWS_S3_BUCKET!,
