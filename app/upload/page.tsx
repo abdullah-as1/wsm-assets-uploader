@@ -41,6 +41,11 @@ export default function Upload() {
     e.preventDefault();
     if (!file || !tenant || !directory) return;
 
+    if (file.size > 1024 * 1024) {
+      setError('File size must be less than 1 MB');
+      return;
+    }
+
     setUploading(true);
     setError('');
     
@@ -181,7 +186,7 @@ export default function Upload() {
                       </div>
                       <p className="text-lg font-semibold text-foreground">Click to select image</p>
                       <p className="text-sm text-muted-foreground mt-1">or drag and drop</p>
-                      <p className="text-xs text-muted-foreground mt-3">PNG, JPG, GIF up to 10MB</p>
+                      <p className="text-xs text-muted-foreground mt-3">PNG, JPG, GIF up to 1MB</p>
                     </>
                   )}
                 </div>
