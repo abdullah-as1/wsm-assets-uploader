@@ -33,18 +33,19 @@ export default function Upload() {
     
     const files = e.dataTransfer.files;
     if (files && files[0]) {
-      setFile(files[0]);
+      if (files[0].size > 1024 * 1024) {
+        setError('File size must be less than 1 MB');
+        setFile(null);
+      } else {
+        setFile(files[0]);
+        setError('');
+      }
     }
   };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !tenant || !directory) return;
-
-    if (file.size > 1024 * 1024) {
-      setError('File size must be less than 1 MB');
-      return;
-    }
 
     setUploading(true);
     setError('');
@@ -152,7 +153,17 @@ export default function Upload() {
             >
               <input
                 type="file"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const selectedFile = e.target.files?.[0] || null;
+                  if (selectedFile && selectedFile.size > 1024 * 1024) {
+                    setError('File size must be less than 1 MB');
+                    setFile(null);
+                    e.target.value = '';
+                  } else {
+                    setFile(selectedFile);
+                    setError('');
+                  }
+                }}
                 className="hidden"
                 id="file-input"
                 accept="image/*"

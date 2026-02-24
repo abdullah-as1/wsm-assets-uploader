@@ -21,6 +21,11 @@ export async function POST(request: Request) {
   const tenant = formData.get('tenant') as string;
   const directory = formData.get('directory') as string;
   
+  // Check file size (1 MB limit)
+  if (file.size > 1024 * 1024) {
+    return NextResponse.json({ error: 'File size must be less than 1 MB' }, { status: 400 });
+  }
+  
   const buffer = Buffer.from(await file.arrayBuffer());
   const key = `${tenant}/${directory}/${file.name}`;
 
