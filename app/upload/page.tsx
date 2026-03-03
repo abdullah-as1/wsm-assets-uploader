@@ -13,6 +13,7 @@ export default function Upload() {
   const [uploading, setUploading] = useState(false);
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
+  const [existingUrl, setExistingUrl] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -33,13 +34,8 @@ export default function Upload() {
     
     const files = e.dataTransfer.files;
     if (files && files[0]) {
-      if (files[0].size > 1024 * 1024) {
-        setError('File size must be less than 1 MB');
-        setFile(null);
-      } else {
-        setFile(files[0]);
-        setError('');
-      }
+      setFile(files[0]);
+      setError('');
     }
   };
 
@@ -49,6 +45,7 @@ export default function Upload() {
 
     setUploading(true);
     setError('');
+    setExistingUrl('');
     
     const formData = new FormData();
     formData.append('file', file);
@@ -65,6 +62,9 @@ export default function Upload() {
       
       if (!res.ok) {
         setError(data.error || 'Upload failed');
+        if (data.existingUrl) {
+          setExistingUrl(data.existingUrl);
+        }
         setUploading(false);
         return;
       }
@@ -155,18 +155,12 @@ export default function Upload() {
                 type="file"
                 onChange={(e) => {
                   const selectedFile = e.target.files?.[0] || null;
-                  if (selectedFile && selectedFile.size > 1024 * 1024) {
-                    setError('File size must be less than 1 MB');
-                    setFile(null);
-                    e.target.value = '';
-                  } else {
-                    setFile(selectedFile);
-                    setError('');
-                  }
+                  setFile(selectedFile);
+                  setError('');
                 }}
                 className="hidden"
                 id="file-input"
-                accept="image/*"
+                accept="image/*,application/pdf"
               />
               <label htmlFor="file-input" className="cursor-pointer block">
                 <div className="flex flex-col items-center justify-center">
@@ -195,9 +189,9 @@ export default function Upload() {
                       <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-3">
                         <Cloud className="w-6 h-6 text-primary" />
                       </div>
-                      <p className="text-lg font-semibold text-foreground">Click to select image</p>
+                      <p className="text-lg font-semibold text-foreground">Click to select file</p>
                       <p className="text-sm text-muted-foreground mt-1">or drag and drop</p>
-                      <p className="text-xs text-muted-foreground mt-3">PNG, JPG, GIF up to 1MB</p>
+                      <p className="text-xs text-muted-foreground mt-3">Images (PNG, JPG, GIF) or PDF documents</p>
                     </>
                   )}
                 </div>
@@ -207,7 +201,21 @@ export default function Upload() {
             {error && (
               <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-xl">
                 <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-destructive">{error}</p>
+                <div className="flex-1">
+                  <p className="text-sm text-destructive">{error}</p>
+                  {existingUrl && (
+                    <div className="mt-2">
+                      <p className="text-xs text-muted-foreground mb-1">Existing file URL:</p>
+                      <input
+                        type="text"
+                        value={existingUrl}
+                        readOnly
+                        className="w-full px-2 py-1 bg-white border border-destructive/20 rounded text-xs font-mono"
+                        onClick={(e) => e.currentTarget.select()}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

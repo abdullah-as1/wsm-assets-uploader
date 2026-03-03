@@ -21,11 +21,6 @@ export async function POST(request: Request) {
   const tenant = formData.get('tenant') as string;
   const directory = formData.get('directory') as string;
   
-  // Check file size (1 MB limit)
-  if (file.size > 1024 * 1024) {
-    return NextResponse.json({ error: 'File size must be less than 1 MB' }, { status: 400 });
-  }
-  
   const buffer = Buffer.from(await file.arrayBuffer());
   const key = `${tenant}/${directory}/${file.name}`;
 
@@ -35,7 +30,9 @@ export async function POST(request: Request) {
       Bucket: process.env.AWS_S3_BUCKET!,
       Key: key,
     }));
-    return NextResponse.json({ error: 'File already exists at this location' }, { status: 409 });
+    const cdnUrl = process.env.CDN_URL || `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+    const existingUrl = `${cdnUrl}/${key}`;
+    return NextResponse.json({ error: 'File already exists at this location', existingUrl }, { status: 409 });
   } catch (err: any) {
     if (err.name !== 'NotFound') {
       throw err;
