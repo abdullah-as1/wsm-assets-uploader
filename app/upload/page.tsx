@@ -47,15 +47,16 @@ export default function Upload() {
     setError('');
     setExistingUrl('');
     
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('tenant', slugify(tenant));
-    formData.append('directory', slugify(directory));
-
     try {
-      const res = await fetch('/api/upload', {
+      const res = await fetch('/api/presigned-url', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type,
+          tenant: slugify(tenant),
+          directory: slugify(directory),
+        }),
       });
 
       const data = await res.json();
@@ -69,7 +70,13 @@ export default function Upload() {
         return;
       }
 
-      setUrl(data.url);
+      await fetch(data.uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: { 'Content-Type': file.type },
+      });
+
+      setUrl(data.finalUrl);
       setFile(null);
       setTenant('');
       setDirectory('');
