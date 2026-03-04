@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { cookies } from 'next/headers';
 
+export const maxDuration = 60;
+
 const s3 = new S3Client({
   region: process.env.AWS_REGION!,
   credentials: {
@@ -9,14 +11,6 @@ const s3 = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
 });
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '50mb',
-    },
-  },
-};
 
 export async function POST(request: Request) {
   const auth = (await cookies()).get('auth');
