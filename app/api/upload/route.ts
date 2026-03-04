@@ -10,6 +10,14 @@ const s3 = new S3Client({
   },
 });
 
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
+
 export async function POST(request: Request) {
   const auth = (await cookies()).get('auth');
   if (!auth) {
