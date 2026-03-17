@@ -167,7 +167,6 @@ export default function Upload() {
                 }}
                 className="hidden"
                 id="file-input"
-                accept="image/*,application/pdf"
               />
               <label htmlFor="file-input" className="cursor-pointer block">
                 <div className="flex flex-col items-center justify-center">
@@ -198,7 +197,7 @@ export default function Upload() {
                       </div>
                       <p className="text-lg font-semibold text-foreground">Click to select file</p>
                       <p className="text-sm text-muted-foreground mt-1">or drag and drop</p>
-                      <p className="text-xs text-muted-foreground mt-3">Images (PNG, JPG, GIF) or PDF documents</p>
+                      <p className="text-xs text-muted-foreground mt-3">Any file type supported</p>
                     </>
                   )}
                 </div>
